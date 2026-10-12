@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2-3 · Incident Response & Risk Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070B1A;--bg2:#0C1230;--panel:#111A3B;--panel2:#18234C;--line:#26346B;--ink:#EEF2FF;--dim:#9DAAD6;
+--a:#6C7CFF;--b:#22D3EE;--ok:#34D399;--warn:#FBBF24;--bad:#FB7185;--vio:#A78BFA;--glow:rgba(108,124,255,.16);--r:18px;
+--grad:linear-gradient(120deg,#6C7CFF,#22D3EE);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#F3F5FF;--bg2:#E8ECFF;--panel:#fff;--panel2:#EEF1FF;--line:#D6DDF5;--ink:#0E1535;--dim:#55618F;--glow:rgba(108,124,255,.12)}}
+:root[data-theme="light"]{--bg:#F3F5FF;--bg2:#E8ECFF;--panel:#fff;--panel2:#EEF1FF;--line:#D6DDF5;--ink:#0E1535;--dim:#55618F;--glow:rgba(108,124,255,.12)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.7 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:Sora,Inter,sans-serif;margin:0;line-height:1.25}
+.wrap{max-width:960px;margin:0 auto;padding:0 20px}
+#bar{position:fixed;top:0;left:0;height:4px;width:0;background:var(--grad);z-index:50}
+#gate{position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;padding:24px;
+background:radial-gradient(700px 420px at 15% 10%,rgba(108,124,255,.35),transparent 60%),radial-gradient(700px 500px at 90% 95%,rgba(34,211,238,.25),transparent 60%),var(--bg)}
+.gc{width:100%;max-width:410px;background:var(--panel);border:1px solid var(--line);border-radius:26px;overflow:hidden;text-align:center;box-shadow:0 40px 90px rgba(0,0,0,.4)}
+.gs{padding:28px 28px 20px;background:linear-gradient(135deg,rgba(108,124,255,.22),rgba(34,211,238,.14));border-bottom:1px solid var(--line)}
+.av{width:68px;height:68px;margin:0 auto 12px;border-radius:22px;background:var(--grad);display:grid;place-items:center;font:800 22px Sora;color:#fff;transform:rotate(-6deg);box-shadow:0 10px 30px rgba(108,124,255,.5)}
+.gs small{color:var(--dim);letter-spacing:2px;font-size:11px}.gs b{display:block;font:700 18px Sora}
+.gb{padding:26px 30px 32px}.gb h2{font-size:21px}.gb p{color:var(--dim);font-size:14px;margin:6px 0 18px}
+#gi{width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--line);background:var(--panel2);color:var(--ink);font-size:20px;letter-spacing:6px;text-align:center;outline:none}
+#gi:focus{border-color:var(--a);box-shadow:0 0 0 4px var(--glow)}
+.btn{border:0;border-radius:12px;padding:13px 20px;font:700 15px Inter;cursor:pointer;color:#fff;background:var(--grad);transition:.2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(108,124,255,.4)}.btn:disabled{opacity:.4;pointer-events:none}
+.btn.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+#gb2{width:100%;margin-top:12px}#ge{min-height:20px;margin-top:10px;color:var(--bad);font-size:13px;font-weight:600}
+.shake{animation:sh .4s}@keyframes sh{25%{transform:translateX(6px)}50%{transform:translateX(-8px)}75%{transform:translateX(4px)}}
+#app{display:none}
+.hero{padding:70px 0 54px;position:relative;overflow:hidden;background:radial-gradient(800px 420px at 85% -10%,rgba(108,124,255,.3),transparent 65%),radial-gradient(600px 360px at 0% 100%,rgba(34,211,238,.16),transparent 65%)}
+.hero:after{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:44px 44px;opacity:.25;mask-image:linear-gradient(#000,transparent 85%);-webkit-mask-image:linear-gradient(#000,transparent 85%);pointer-events:none}
+.hero .wrap{position:relative;z-index:1}
+.pill{display:inline-flex;gap:8px;align-items:center;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:var(--panel);font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:var(--b);font-weight:600}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.hero h1{font-size:clamp(34px,7vw,60px);letter-spacing:-1.5px;margin:18px 0 12px}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{color:var(--dim);font-size:17px;max-width:640px}
+.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.meta span{padding:8px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:13px;color:var(--dim)}.meta b{color:var(--ink)}
+section{padding:56px 0}
+.sh{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.n{width:40px;height:40px;border-radius:13px;background:var(--grad);display:grid;place-items:center;font:800 14px Sora;color:#fff;flex:none}
+.sh h2{font-size:clamp(21px,4vw,28px)}.lead{color:var(--dim);margin:0 0 24px;max-width:720px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.obj{display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed var(--line)}.obj:last-child{border:0}
+.obj i{font-style:normal;width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--glow);color:var(--a);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+.chip{padding:8px 15px;border-radius:99px;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--panel);color:var(--dim)}
+.chip:nth-child(3n+1){color:var(--a)}.chip:nth-child(3n+2){color:var(--b)}.chip:nth-child(3n){color:var(--vio)}
+.big{padding:26px;border-radius:22px;background:linear-gradient(135deg,#4F46E5,#0891B2);color:#fff;box-shadow:0 20px 50px rgba(79,70,229,.35)}
+.big small{letter-spacing:2px;font-weight:700;opacity:.8;font-size:12px}.big h3{font-size:22px;margin:6px 0 14px}.big p{margin:0;opacity:.95}
+.dia{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:14px;overflow-x:auto}
+.dia svg{min-width:640px;width:100%;height:auto;display:block}
+.dash{stroke-dasharray:7 7;animation:fl 1s linear infinite}@keyframes fl{to{stroke-dashoffset:-14}}
+.cap{font-size:13px;color:var(--dim);text-align:center;margin-top:10px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.tab{padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--dim);font:600 14px Inter;cursor:pointer;transition:.2s}
+.tab:hover{color:var(--ink)}.tab.on{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 8px 22px rgba(108,124,255,.4)}
+.row{display:flex;gap:16px;padding:14px 0;border-bottom:1px dashed var(--line)}.row:last-child{border:0}
+.row .k{min-width:96px;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--b);padding-top:3px}.row .v{color:var(--dim)}
+.pane h3{font-size:22px;margin-bottom:4px}.pane .ic{font-size:30px}
+.fade{animation:fd .35s}@keyframes fd{from{opacity:0;transform:translateY(8px)}}
+.sim{display:grid;gap:18px;grid-template-columns:1.1fr .9fr}@media(max-width:720px){.sim{grid-template-columns:1fr}}
+.sl{margin-bottom:18px}.sl label{display:flex;justify-content:space-between;font-weight:600;font-size:14.5px;margin-bottom:6px}.sl label b{color:var(--b)}
+.sl small{display:block;color:var(--dim);font-size:12px}
+input[type=range]{width:100%;accent-color:#6C7CFF}
+.pre{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.pre .btn{padding:9px 13px;font-size:13px}
+.meter{height:14px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);overflow:hidden;margin:10px 0}.meter div{height:100%;width:0;border-radius:99px;transition:.5s}
+.score{font:800 46px Sora}.out{margin-top:14px;padding:14px;border-radius:14px;background:var(--panel2);border-left:4px solid var(--warn);font-size:14.5px;color:var(--dim);min-height:70px}
+.mq{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:14px}
+.mq .t{font-weight:600;margin-bottom:14px}.mq .tag{font:700 11px Inter;letter-spacing:1.4px;color:var(--vio);text-transform:uppercase;margin-bottom:6px}
+.os{display:grid;gap:9px}.o{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--panel2);cursor:pointer;font-size:15px;transition:.15s;text-align:left;color:var(--ink);font-family:inherit;width:100%}
+.o:hover{border-color:var(--a);transform:translateX(3px)}.o u{text-decoration:none;width:26px;height:26px;border-radius:8px;background:var(--panel);display:grid;place-items:center;font:700 12px Sora;color:var(--dim);flex:none}
+.o.ok{border-color:var(--ok);background:rgba(52,211,153,.14)}.o.ok u{background:var(--ok);color:#042}.o.no{border-color:var(--bad);background:rgba(251,113,133,.14)}.o.no u{background:var(--bad);color:#fff}
+.fb{display:none;margin-top:14px;padding:13px 15px;border-radius:12px;background:var(--panel2);border-left:4px solid var(--warn);font-size:14px;color:var(--dim)}.fb.show{display:block;animation:fd .3s}
+table{width:100%;border-collapse:collapse;font-size:14.5px}th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--b);font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.hi{color:var(--bad);font-weight:700}.md{color:var(--warn);font-weight:700}.lo{color:var(--ok);font-weight:700}
+.gl{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}.gi{border-bottom:1px solid var(--line);background:var(--panel)}.gi:last-child{border:0}
+.gh{padding:16px 20px;display:flex;justify-content:space-between;cursor:pointer;font-weight:600}.gh span{color:var(--a);font-size:20px}.gbd{display:none;padding:0 20px 16px;color:var(--dim);font-size:14.5px}.gi.open .gbd{display:block}
+.sum li{margin-bottom:10px}.sum{margin:0;padding-left:20px}
+.qtop{display:flex;justify-content:space-between;color:var(--dim);font-size:13.5px;font-weight:600;margin-bottom:8px}
+.pg{height:8px;border-radius:99px;background:var(--panel2);margin-bottom:16px;overflow:hidden}.pg div{height:100%;width:0;background:var(--grad);transition:.4s}
+.qn{display:flex;gap:10px;margin-top:16px}.qn .btn{flex:1}
+#res{display:none;text-align:center;padding:36px 20px}#res .score{font-size:64px}
+.ans{padding:16px;border-radius:14px;background:var(--panel2);border-left:4px solid var(--ok);color:var(--dim);font-size:14.5px}.ans ol{margin:8px 0 0;padding-left:20px}
+footer{padding:44px 0 70px;text-align:center;color:var(--dim);font-size:13.5px;border-top:1px solid var(--line)}footer b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="gate"><div class="gc"><div class="gs"><div class="av">AT</div><small>PREPARED BY</small><b>Mr. Ahmed Tamer · م/ أحمد تامر</b></div>
+<div class="gb"><h2>Lesson 2-3</h2><p>Incident Response &amp; Risk Management — enter the class password to start.</p>
+<input id="gi" type="tel" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off"><button class="btn" id="gb2">Unlock Lesson</button><div id="ge"></div></div></div></div>
+
+<div id="app">
+<header class="hero"><div class="wrap">
+<span class="pill"><i></i>Unit 2 · Cyber Security</span>
+<h1>Lesson 2-3<br><span class="grad">Incident Response &amp; Risk Management</span></h1>
+<p class="sub">Even the best defenses can fail. Learn the six phases of responding to a security incident, and how to decide which risks to fix first.</p>
+<div class="meta"><span>Programming &amp; AI</span><span>Second Secondary · Term 1 · 2026/2027</span><span><b>Mr. Ahmed Tamer</b> · 01026309600</span></div>
+</div></header>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">01</div><h2>Learning Objectives</h2></div>
+<p class="lead">After this lesson you will be able to:</p>
+<div class="card">
+<div class="obj"><i>1</i><div><b>Define</b> a security incident and give examples of it.</div></div>
+<div class="obj"><i>2</i><div><b>Order</b> and describe the six general phases of incident response.</div></div>
+<div class="obj"><i>3</i><div><b>Calculate</b> risk degree (Impact × Likelihood) and prioritize which risk to treat first.</div></div>
+<div class="obj"><i>4</i><div><b>Link</b> response actions to preventive controls so every incident leads to improvement.</div></div></div>
+<div class="chips"><span class="chip">Security Incident</span><span class="chip">Preparation</span><span class="chip">Containment</span><span class="chip">Eradication</span><span class="chip">Recovery</span><span class="chip">Risk Degree</span></div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">02</div><h2>The Big Question</h2></div>
+<p class="lead">Even with deep protection and defense, a security incident — such as a data leak or a service outage — can still happen. That is why organizations use an organized <b>incident response plan</b>: stop the spread, remove the threat, restore the service, then learn from it.</p>
+<div class="big"><small>MAIN QUESTION</small><h3>When a security incident happens, how should an organization organize its response across the general phases, and how does it decide which risks to treat first?</h3>
+<p><b>Key idea:</b> <b>Risk degree = Impact × Likelihood</b></p></div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">03</div><h2>What Is a Security Incident?</h2></div>
+<div class="card"><p style="margin-top:0"><b>Security incident:</b> an event that affects the <b>confidentiality</b>, <b>integrity</b> or <b>availability</b> of information, threatens them seriously, or violates a security policy.</p>
+<div class="row"><div class="k">Examples</div><div class="v">Leak of personal or confidential data to the outside · Disrupting an essential service with a DoS attack · Ransomware tampering with and encrypting files · Unauthorized access to an employee's account · An incident can even be a policy violation with no data leak.</div></div></div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">04</div><h2>The Incident Response Cycle</h2></div>
+<p class="lead">Six phases, one after another — and the last one feeds back into the first.</p>
+<div class="dia"><svg viewBox="0 0 760 200" font-family="Inter,sans-serif" font-size="12">
+<g id="ph"></g>
+<path class="dash" d="M690 150 V185 H70 V150" fill="none" stroke="var(--b)" stroke-width="2.5"/><text x="380" y="180" text-anchor="middle" fill="var(--b)" font-weight="700">Lessons learned improve the next Preparation</text>
+</svg></div>
+<p class="cap">Phases can repeat or overlap depending on the incident — the team may go back to an earlier phase.</p>
+<div class="card" style="margin-top:14px;border-left:4px solid var(--vio)"><b>Memory trick:</b> Prepare → Detect → Contain → Eradicate → Recover → Learn.</div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">05</div><h2>The Six Phases in Detail</h2></div>
+<p class="lead">Tap a phase to see its purpose.</p>
+<div class="tabs" id="tabs"></div><div class="card pane" id="pane"></div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">06</div><h2>Risk Management — Who Gets Treated First?</h2></div>
+<p class="lead">Not all risks are treated at the same time. Risks are scored to set the treatment priority.</p>
+<div class="big" style="margin-bottom:16px"><small>THE SIMPLE EQUATION</small><h3>Risk degree = Impact × Likelihood</h3>
+<p><b>Impact:</b> size of the damage if the event happens (data loss, service outage, financial loss). <b>Likelihood:</b> how probable it is, based on threats and weaknesses. Each is scored out of 5.</p></div>
+<div class="card"><table><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Degree</th><th>Priority</th></tr>
+<tr><td>Student database leak</td><td>2</td><td>5</td><td>10</td><td class="hi">High</td></tr>
+<tr><td>School website down for one day</td><td>4</td><td>2</td><td>8</td><td class="md">Medium</td></tr>
+<tr><td>Losing an old unused tablet</td><td>1</td><td>1</td><td>1</td><td class="lo">Low</td></tr></table></div>
+<div class="card" style="margin-top:14px;border-left:4px solid var(--warn)"><b>Stop &amp; Think:</b> a risk with high likelihood but tiny impact vs. one with low likelihood but catastrophic impact — compute both degrees first. Then think: some organizations give <b>extra weight to catastrophic impact</b> even when it is rare. Math guides you, but it does not decide alone.</div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">07</div><h2>Lab — Risk Calculator</h2></div>
+<p class="lead">Move the sliders or load an example, and see the degree and priority.</p>
+<div class="sim"><div class="card">
+<div class="sl"><label>Likelihood <b id="lv">3</b></label><input type="range" id="li" min="1" max="5" value="3"><small>1 = very unlikely · 5 = almost certain</small></div>
+<div class="sl"><label>Impact <b id="iv">3</b></label><input type="range" id="im" min="1" max="5" value="3"><small>1 = tiny damage · 5 = catastrophic</small></div>
+<div class="pre"><button class="btn ghost" data-l="2" data-i="5">DB leak</button><button class="btn ghost" data-l="4" data-i="2">Website down</button><button class="btn ghost" data-l="1" data-i="1">Old tablet</button></div></div>
+<div class="card"><div style="color:var(--dim);font-size:13px;font-weight:600;letter-spacing:1px">RISK DEGREE</div>
+<div class="score" id="sc">9</div><div class="meter"><div id="mt"></div></div><div class="out" id="out"></div></div></div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">08</div><h2>Activity — Name That Phase</h2></div>
+<p class="lead">Read each situation and choose the phase.</p><div id="act"></div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">09</div><h2>Exam Tip — Linking Response to Controls</h2></div>
+<div class="card" style="border-left:4px solid var(--vio)">In a question like <b>“link response actions to preventive controls”</b>: every incident we learn from must lead to an improvement.<br><br><b>Example:</b> a phishing incident → <b>awareness training + two-factor authentication</b>. This link is what raises your mark in the essay question!</div>
+<div class="card" style="margin-top:14px"><b>Model answer — hijacked employee email account:</b>
+<ol><li><b>Preparation:</b> response plan and trained team → control: awareness training.</li><li><b>Detection:</b> unusual login alerts; identify the account and systems affected.</li><li><b>Containment:</b> lock the account and isolate the affected device.</li><li><b>Eradication:</b> remove malware, reset the password, close the weakness used.</li><li><b>Recovery:</b> restore the account/data from a clean backup and verify safety.</li><li><b>Learning:</b> analyze what happened → enable two-factor authentication to reduce repeat chance.</li></ol></div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">10</div><h2>Test Yourself — Lesson 2-3</h2></div>
+<p class="lead">Part 1: multiple choice · Part 2: true or false · Part 3: matching.</p><div id="t1"></div><div id="t2"></div><div id="t3"></div>
+<div class="ans"><b>Question 4 (exam style):</b> Design a justified response to an email-account hijack incident, ordering your actions across the six phases and linking each to a suitable preventive control. <br>→ Use the model answer in section 09.</div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">11</div><h2>Key Terms — Review Before the Test</h2></div><div class="gl" id="gl"></div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">12</div><h2>Summary — Main Question Answered</h2></div>
+<div class="big"><ul class="sum"><li>A <b>security incident</b> harms confidentiality, integrity or availability, or violates a policy.</li>
+<li>Response follows <b>six phases</b>: Preparation, Detection, Containment, Eradication, Recovery, Learning.</li>
+<li><b>Risk degree = Impact × Likelihood</b> decides which risks to treat first.</li>
+<li>Every incident must lead to <b>improved controls</b>.</li></ul></div>
+</div></section>
+
+<section><div class="wrap">
+<div class="sh"><div class="n">13</div><h2>Unit 2 Test — Question Bank</h2></div>
+<p class="lead">15 multiple-choice questions covering the whole unit. Pick an answer to see the explanation.</p>
+<div class="qtop"><span id="ql"></span><span id="qs"></span></div><div class="pg"><div id="pb"></div></div>
+<div class="mq" id="qc"></div>
+<div class="mq" id="res"><div class="score grad" id="fs"></div><h3 id="fm" style="margin:6px 0 18px"></h3><button class="btn" id="again">Try again</button></div>
+</div></section>
+
+<footer><div class="wrap">Programming &amp; Artificial Intelligence — Second Secondary<br><b>Mr. Ahmed Tamer · م/ أحمد تامر</b> · 01026309600</div></footer>
+</div>
+
+<script>
+const $=s=>document.getElementById(s),L='ABCD';
+function go(){if($('gi').value.trim()==='546362'){$('gate').style.display='none';$('app').style.display='block'}else{$('ge').textContent='Wrong password — try again.';$('gi').classList.add('shake');setTimeout(()=>$('gi').classList.remove('shake'),400)}}
+$('gb2').onclick=go;$('gi').onkeydown=e=>{if(e.key==='Enter')go()};
+addEventListener('scroll',()=>{const h=document.documentElement;$('bar').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'});
+function mcq(box,items,tag){items.forEach((m,i)=>{const d=document.createElement('div');d.className='mq';
+d.innerHTML=`<div class="tag">${tag} ${i+1}</div><div class="t">${m.q}</div><div class="os"></div><div class="fb">${m.e}</div>`;
+const os=d.querySelector('.os');m.o.forEach((o,j)=>{const b=document.createElement('button');b.className='o';b.innerHTML=`<u>${L[j]}</u><span>${o}</span>`;
+b.onclick=()=>{if(os.dataset.d)return;os.dataset.d=1;b.classList.add(j===m.a?'ok':'no');os.children[m.a].classList.add('ok');d.querySelector('.fb').classList.add('show')};os.appendChild(b)});box.appendChild(d)})}
+/* phases */
+const P=[
+["📋","Preparation","Before the incident","Plans, teams and tools ready before the incident happens — being prepared saves precious time.","Writing a response plan, training the team, preparing backups."],
+["🔎","Detection & Identification","Discover it","Discover the incident, and determine its nature, scope and the affected systems.","An alert shows unusual logins; the team confirms which systems are affected."],
+["🧯","Containment","Stop the spread","Stop the problem from spreading — isolate the infected systems from the rest of the network.","Disconnecting an infected computer from the network."],
+["🧹","Eradication","Remove the threat","Remove the threat itself — delete the malware and close the exploited weakness.","Deleting malicious software and patching the vulnerability."],
+["♻️","Recovery","Back to service","Restore the service from clean backups and confirm the systems are safe.","Restoring files from a clean backup, then testing the system."],
+["🎓","Learning","Improve","Analyze what happened and improve protection and plans so it does not repeat.","A review meeting that adds two-factor authentication."]];
+const g=$('ph');P.forEach((p,i)=>{const x=20+i*118;g.innerHTML+=`<rect x="${x}" y="30" width="108" height="100" rx="14" fill="var(--panel2)" stroke="var(--a)"/><text x="${x+54}" y="56" text-anchor="middle" fill="var(--b)" font-weight="800" font-size="16">${i+1}</text><text x="${x+54}" y="84" text-anchor="middle" font-size="20">${p[0]}</text><text x="${x+54}" y="108" text-anchor="middle" fill="var(--ink)" font-weight="700" font-size="11">${p[1].split(' ')[0]}</text><text x="${x+54}" y="122" text-anchor="middle" fill="var(--dim)" font-size="10">${p[2]}</text>`;if(i<5)g.innerHTML+=`<path d="M${x+108} 80 H${x+118}" stroke="var(--b)" stroke-width="2.5"/>`});
+const tabs=$('tabs'),pane=$('pane');
+P.forEach((c,i)=>{const t=document.createElement('button');t.className='tab'+(i?'':' on');t.textContent=(i+1)+'. '+c[1].split(' ')[0];t.onclick=()=>{[...tabs.children].forEach(x=>x.classList.remove('on'));t.classList.add('on');show(i)};tabs.appendChild(t)});
+function show(i){const c=P[i];pane.className='card pane fade';void pane.offsetWidth;pane.innerHTML=`<div class="ic">${c[0]}</div><h3>${i+1}) ${c[1]}</h3><div class="row"><div class="k">Purpose</div><div class="v">${c[3]}</div></div><div class="row"><div class="k">Example</div><div class="v">${c[4]}</div></div>`}show(0);
+/* risk calc */
+function calc(){const l=+$('li').value,i=+$('im').value,d=l*i;$('lv').textContent=l;$('iv').textContent=i;$('sc').textContent=d;
+const m=$('mt');m.style.width=(d/25*100)+'%';const hi=d>=10,md=d>=5&&d<10;
+m.style.background=hi?'var(--bad)':md?'var(--warn)':'var(--ok)';
+const o=$('out');o.style.borderColor=hi?'var(--bad)':md?'var(--warn)':'var(--ok)';
+o.innerHTML=`${l} × ${i} = <b>${d}</b> → <b>${hi?'High priority: treat first':md?'Medium priority: plan treatment':'Low priority: monitor'}</b>.`}
+$('li').oninput=$('im').oninput=calc;
+document.querySelectorAll('.pre .btn').forEach(b=>b.onclick=()=>{$('li').value=b.dataset.l;$('im').value=b.dataset.i;calc()});calc();
+/* activity */
+mcq($('act'),[
+{q:"The team writes a response plan, trains staff and prepares clean backups before anything happens.",o:["Preparation","Containment","Recovery","Learning"],a:0,e:"Preparation: plans, teams and tools are ready before the incident."},
+{q:"An infected computer is disconnected from the network so the problem cannot spread.",o:["Eradication","Containment","Detection","Preparation"],a:1,e:"Containment stops the spread by isolating affected systems."},
+{q:"Deleting the malware and closing the weakness the attacker used.",o:["Recovery","Containment","Eradication","Detection"],a:2,e:"Eradication removes the threat itself and closes the exploited gap."},
+{q:"Restoring the service from a clean backup, then checking the systems are safe.",o:["Recovery","Eradication","Learning","Containment"],a:0,e:"Recovery returns the service to normal using clean backups."},
+{q:"After a phishing incident, the school adds awareness training and two-factor authentication.",o:["Detection","Containment","Learning from the incident","Eradication"],a:2,e:"Learning turns the incident into improved controls."}],"Scenario");
+/* test */
+mcq($('t1'),[
+{q:"A security incident is an event that:",o:["Affects the confidentiality, integrity or availability of information, or violates a security policy","Happens only on phones","Concerns software only, never data","Can never be prevented"],a:0,e:"It affects confidentiality, integrity or availability, or breaks a policy."},
+{q:"The phase in which the spread of the problem is stopped by isolating infected systems:",o:["Preparation","Containment","Recovery","Learning"],a:1,e:"Containment isolates infected systems."},
+{q:"If a risk's impact is 4 and its likelihood is 3, the risk degree equals:",o:["7","12","1","43"],a:1,e:"4 × 3 = 12."},
+{q:"The phase that comes before all response phases and prepares plans and teams:",o:["Detection","Eradication","Preparation","Recovery"],a:2,e:"Preparation comes first."}],"Q1 · MCQ");
+const tf=[["A security incident may violate a security policy even without a data leak.",1,"True — a policy violation alone counts as an incident."],["The six response phases are strict and can never overlap or repeat.",0,"False — they can overlap or repeat depending on the incident."],["Removing the malware and closing the gap happens in the Recovery phase.",0,"False — that is Eradication."],["A high-likelihood risk must always be treated first, whatever its impact.",0,"False — risk degree uses impact too, and catastrophic impact may get extra weight."]];
+tf.forEach((m,i)=>{const d=document.createElement('div');d.className='mq';d.innerHTML=`<div class="tag">Q2 · True / False ${i+1}</div><div class="t">${m[0]}</div><div class="os"></div><div class="fb">${m[2]}</div>`;const os=d.querySelector('.os');['True ✓','False ✗'].forEach((o,j)=>{const b=document.createElement('button');b.className='o';const v=j===0?1:0;b.innerHTML=`<span>${o}</span>`;b.onclick=()=>{if(os.dataset.d)return;os.dataset.d=1;b.classList.add(v===m[1]?'ok':'no');os.children[m[1]?0:1].classList.add('ok');d.querySelector('.fb').classList.add('show')};os.appendChild(b)});$('t2').appendChild(d)});
+mcq($('t3'),[
+{q:"Stopping the spread and isolating the infected system matches:",o:["Recovery","Containment","Learning from the incident"],a:1,e:"Containment."},
+{q:"Returning the service from clean backups matches:",o:["Recovery","Containment","Learning from the incident"],a:0,e:"Recovery."},
+{q:"Analyzing the incident to improve protection matches:",o:["Recovery","Containment","Learning from the incident"],a:2,e:"Learning from the incident."}],"Q3 · Match");
+/* glossary */
+[["Security incident","An event that harms confidentiality, integrity or availability, or violates a security policy."],["Preparation","Plans, teams and tools ready before an incident occurs."],["Detection & Identification","Discovering the incident and determining its nature, scope and affected systems."],["Containment","Stopping the spread by isolating affected systems."],["Eradication","Removing the threat itself and closing the exploited weakness."],["Recovery","Restoring the service from clean backups and verifying safety."],["Learning from the incident","Analyzing what happened to improve protection and plans."],["Risk degree","Impact × Likelihood; used to set treatment priority."]].forEach(t=>{const d=document.createElement('div');d.className='gi';d.innerHTML=`<div class="gh">${t[0]}<span>+</span></div><div class="gbd">${t[1]}</div>`;d.firstChild.onclick=()=>{d.classList.toggle('open');d.querySelector('span').textContent=d.classList.contains('open')?'−':'+'};$('gl').appendChild(d)});
+/* unit quiz */
+const Q=[
+{q:"In the TLS handshake, public-key encryption is mainly used for:",o:["Encrypting all session data","Authenticating with the certificate and deriving session keys","Compressing data","Blocking viruses"],a:1,e:"Public-key encryption authenticates and derives the session keys; symmetric encryption then protects the data."},
+{q:"Non-repudiation is provided by:",o:["A firewall","A digital signature","Symmetric encryption","Plain text"],a:1,e:"A digital signature proves who sent or signed, so it cannot be denied."},
+{q:"“Something you have” in multi-factor authentication is for example:",o:["A password","A code on the phone","A username","A favourite colour"],a:1,e:"A phone code is a possession factor."},
+{q:"Hosting public services in an area isolated from the internal network is called:",o:["VPN","DMZ","2FA","PDCA"],a:1,e:"That is a DMZ."},
+{q:"Zero Trust means:",o:["Full trust in internal users","Verify every access continuously without automatic trust","Cancel all passwords","Block remote access"],a:1,e:"Never trust automatically — verify every access."},
+{q:"A risk with likelihood 3 and impact 5 has degree:",o:["8","15","2","35"],a:1,e:"3 × 5 = 15."},
+{q:"Symmetric encryption uses:",o:["Two different keys","One shared key for encryption and decryption","No key","A public certificate only"],a:1,e:"The same shared key encrypts and decrypts."},
+{q:"Having HTTPS guarantees that the site content is absolutely safe.",o:["True","False"],a:1,e:"False — HTTPS protects the connection, not the safety of the site's content."},
+{q:"Defense in Depth means:",o:["Relying on one strong layer","Using multiple protection layers","Removing the firewall","Sharing one password"],a:1,e:"Layered controls compensate for each other."},
+{q:"The Containment phase aims to:",o:["Stop the spread by isolating affected systems","Delete all backups","Announce the attack publicly","Buy new devices"],a:0,e:"Containment stops the spread."},
+{q:"A digital certificate links:",o:["A site's identity to its public key","A password to a username","A file to its size","A VPN to a router"],a:0,e:"A digital certificate ties a site's identity to its public key."},
+{q:"An encrypted tunnel across an untrusted public network is a:",o:["Digital certificate","VPN","Risk degree","Containment"],a:1,e:"A VPN."},
+{q:"Which phase removes the threat and closes the exploited gap?",o:["Eradication","Recovery","Preparation","Detection"],a:0,e:"Eradication."},
+{q:"A risk ranks high priority when:",o:["Its degree (impact × likelihood) is high","It has a short name","It was found first","It affects an unused device"],a:0,e:"Priority follows the risk degree."},
+{q:"After an incident, the organization should:",o:["Forget it","Analyze it and improve controls","Blame one person","Disable logging"],a:1,e:"The Learning phase turns incidents into improvements."}];
+let qi=0,sc=0,an=[];
+function rq(){const q=Q[qi];$('ql').textContent=`Question ${qi+1} of ${Q.length}`;$('qs').textContent=`Correct: ${sc}`;$('pb').style.width=(qi/Q.length*100)+'%';
+$('qc').style.display='block';$('res').style.display='none';
+$('qc').innerHTML=`<div class="t" style="font-size:17px">${q.q}</div><div class="os"></div><div class="fb">${q.e}</div><div class="qn"><button class="btn ghost" id="pv" ${qi?'':'disabled'}>Previous</button><button class="btn" id="nx" disabled>${qi===Q.length-1?'Finish':'Next'}</button></div>`;
+const os=$('qc').querySelector('.os');q.o.forEach((o,j)=>{const b=document.createElement('button');b.className='o';b.innerHTML=`<u>${L[j]}</u><span>${o}</span>`;
+b.onclick=()=>{if(an[qi]!==undefined)return;an[qi]=j;if(j===q.a)sc++;pick(q,os,j)};os.appendChild(b)});
+if(an[qi]!==undefined)pick(q,os,an[qi]);
+$('pv').onclick=()=>{qi--;rq()};$('nx').onclick=()=>{if(qi===Q.length-1)fin();else{qi++;rq()}}}
+function pick(q,os,j){os.children[j].classList.add(j===q.a?'ok':'no');os.children[q.a].classList.add('ok');$('qc').querySelector('.fb').classList.add('show');$('nx').disabled=false;$('qs').textContent=`Correct: ${sc}`}
+function fin(){$('qc').style.display='none';$('res').style.display='block';$('pb').style.width='100%';$('fs').textContent=`${sc} / ${Q.length}`;
+$('fm').textContent=sc>=13?'Outstanding — you respond like a security pro!':sc>=9?'Good work — review the key terms and retry.':'Keep going — re-read the six phases and try again.'}
+$('again').onclick=()=>{qi=0;sc=0;an=[];rq()};rq();
+</script>
+</body>
+</html>
